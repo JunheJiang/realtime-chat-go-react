@@ -4,6 +4,7 @@ import { connect, sendMsg } from "./api";
 import { useEffect, useState } from 'react';
 import Header from "./components/Header";
 import ChatHistory from './components/ChatHistory';
+import ChatInput from './components/ChatInput';
 
 function App() {
   const [chatHistory, setChatHistory] = useState([]);
@@ -19,8 +20,16 @@ function App() {
   }, [chatHistory]);
 
 
-  function send() {
-    sendMsg("hello");
+  // function send() {
+  //   sendMsg("hello");
+  // }
+
+  function send(event) {
+    console.log(event);
+    if (event.target.value) {
+      sendMsg(event.target.value);
+      event.target.value = "";
+    }
   }
 
   return (
@@ -44,7 +53,8 @@ function App() {
       {/* no this */}
       <Header />
       <ChatHistory chatHistory={chatHistory} />
-      <button onClick={send}>Hit</button>
+      {/* <button onClick={send}>Hit</button> */}
+      <ChatInput send={send} />
     </div>
   );
 }

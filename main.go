@@ -2,41 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"realtime-chat-go-react/pkg/webscoket"
 )
 
 func setupRoutes() {
-	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+	pool := webscoket.NewPool()
+	go pool.Start()
+
+	http.HandleFunc("/ws", func(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println(writer, "Simple Server")
+		serveWs(pool, writer, request)
 	})
-	http.HandleFunc("/ws", serveWs)
-}
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-func reader(conn *websocket.Conn) {
-	//loops
-	for {
-		messageType, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(string(p))
-
-		if err := conn.WriteMessage(messageType, p); err != nil {
-			log.Println(err)
-			return
-		}
-	}
 }
 
 /*
@@ -44,19 +23,25 @@ func reader(conn *websocket.Conn) {
 w http.ResponseWriter
 值传递
 */
-func serveWs(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Host)
+func serveWs(pool *webscoket.Pool, w http.ResponseWriter, r *http.Request) {
+	fmt.Println("WebSocket Endpoint Hit")
 
 	//upgrade http request to websocket request
-	wsConn, err := upgrader.Upgrade(w, r, nil)
+	wsConn, err := webscoket.Upgrade(w, r)
 	if err != nil {
 		log.Println(err)
 	}
-
-	reader(wsConn)
+	//多个客户端
+	client := &webscoket.Client{
+		Conn: wsConn,
+		Pool: pool,
+	}
+	pool.Register <- client
+	//go webscoket.Writer(wsConn)
+	webscoket.Reader(wsConn)
 }
 func main() {
-	fmt.Println("Chat App v0.0.1")
+	fmt.Println("Distributed Chat App v0.0.1")
 	setupRoutes()
 	http.ListenAndServe(":8080", nil)
 }

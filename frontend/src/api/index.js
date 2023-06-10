@@ -1,5 +1,5 @@
 var socket = new WebSocket("ws://localhost:8080/ws");
-//代参 cb 回调函数
+//带参函数 参数cb为回调函数
 let connect = cb => {
     console.log("Attempting Connection");
 
@@ -7,9 +7,9 @@ let connect = cb => {
         console.log("Suceesfully Connected");
     };
 
-    socket.onmessage = msg => {
-        console.log(msg);
-        cb(msg)
+    socket.onmessage = event => {
+        console.log("Client Recieving Msg:" + event.data);
+        cb(event)
     };
 
     socket.onclose = event => {
