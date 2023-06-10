@@ -1,15 +1,25 @@
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 import { connect, sendMsg } from "./api";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Header from "./components/Header";
+import ChatHistory from './components/ChatHistory';
 
 function App() {
+  const [chatHistory, setChatHistory] = useState([]);
+
   useEffect(() => {
-    connect();
-  }, []);
+    connect(
+      (msg) => {
+        console.log(msg);
+        let tempArr = [...chatHistory, msg]
+        console.log(tempArr);
+        setChatHistory(tempArr);
+      });
+  }, [chatHistory]);
+
 
   function send() {
-    console.log("hello");
     sendMsg("hello");
   }
 
@@ -31,7 +41,9 @@ function App() {
     //   </header>
     // </div>
     <div className='App'>
-    {/* no this */}
+      {/* no this */}
+      <Header />
+      <ChatHistory chatHistory={chatHistory} />
       <button onClick={send}>Hit</button>
     </div>
   );

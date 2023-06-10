@@ -1,6 +1,6 @@
 var socket = new WebSocket("ws://localhost:8080/ws");
-
-let connect = () => {
+//代参 cb 回调函数
+let connect = cb => {
     console.log("Attempting Connection");
 
     socket.onopen = () => {
@@ -9,6 +9,7 @@ let connect = () => {
 
     socket.onmessage = msg => {
         console.log(msg);
+        cb(msg)
     };
 
     socket.onclose = event => {
@@ -19,8 +20,9 @@ let connect = () => {
         console.log("Socket Error:", err);
     };
 };
+
 let sendMsg = msg => {
-    console.log("sending msg: ", msg);
+    console.log("Client Sending Msg: ", msg);
     socket.send(msg)
 };
 
